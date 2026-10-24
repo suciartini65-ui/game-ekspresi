@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Ekspresi - Duel 2 Pemain (Bahasa Indonesia Kelas 2 SD)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka & Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        p1Color: '#FF5964',
+                        p2Color: '#35A7FF',
+                        brandYellow: '#FFD166',
+                        brandGreen: '#06D6A0',
+                        brandPurple: '#9D4EDD',
+                        bgSoft: '#F4F7FE'
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        nunito: ['Nunito', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F4F7FE;
+            background-image: radial-gradient(#FFD166 1.5px, transparent 1.5px), radial-gradient(#35A7FF 1.5px, #F4F7FE 1.5px);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+        }
+
+        .title-font {
+            font-family: 'Fredoka', cursive;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .btn-bounce:active {
+            transform: scale(0.95);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            border: 4px solid #FFFFFF;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        .option-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 12px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .active-turn-p1 {
+            border-color: #FF5964 !important;
+            box-shadow: 0 0 15px rgba(255, 89, 100, 0.4);
+        }
+        .active-turn-p2 {
+            border-color: #35A7FF !important;
+            box-shadow: 0 0 15px rgba(53, 167, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 sm:p-5 select-none">
+
+    <!-- Container Utama Game -->
+    <div class="w-full max-w-3xl bg-white rounded-3xl p-4 sm:p-7 glass-card border-4 border-yellow-300 relative overflow-hidden my-auto">
+
+        <!-- Decor Background Elements -->
+        <div class="absolute -top-12 -right-12 w-32 h-32 bg-red-100 rounded-full opacity-50 pointer-events-none"></div>
+        <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-blue-100 rounded-full opacity-50 pointer-events-none"></div>
+
+        <!-- ==================== 1. HALAMAN UTAMA (START) ==================== -->
+        <div id="start-screen" class="text-center py-2 relative z-10">
+            <!-- Header Kartun 2 Pemain -->
+            <div class="flex justify-center items-center gap-4 sm:gap-8 mb-4">
+                <div class="text-center animate-float">
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 bg-rose-100 rounded-full flex items-center justify-center border-4 border-rose-400 shadow-md">
+                        <span class="text-4xl sm:text-5xl">👧🏻</span>
+                    </div>
+                    <span class="title-font text-xs sm:text-sm font-bold text-rose-600 mt-1 block">Pemain 1</span>
+                </div>
+
+                <div class="title-font text-2xl sm:text-3xl font-extrabold text-amber-500 bg-amber-100 px-3 py-1 rounded-2xl border-2 border-amber-300">
+                    VS
+                </div>
+
+                <div class="text-center animate-float" style="animation-delay: 0.5s;">
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 bg-sky-100 rounded-full flex items-center justify-center border-4 border-sky-400 shadow-md">
+                        <span class="text-4xl sm:text-5xl">👦🏽</span>
+                    </div>
+                    <span class="title-font text-xs sm:text-sm font-bold text-sky-600 mt-1 block">Pemain 2</span>
+                </div>
+            </div>
+
+            <h1 class="title-font text-2xl sm:text-4xl font-bold text-indigo-700 tracking-wide mb-1">
+                Petualangan Ekspresi
+            </h1>
+            <p class="text-xs sm:text-base font-bold text-amber-600 mb-5 bg-amber-50 inline-block px-4 py-1 rounded-full border border-amber-200">
+                ⚡ Mode 2 Pemain - Tantangan 2 Menit ⚡
+            </p>
+
+            <!-- Input Nama Pemain -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto mb-5 text-left">
+                <div class="bg-rose-50 p-3 rounded-2xl border-2 border-rose-200">
+                    <label class="title-font text-xs font-bold text-rose-700 block mb-1">Nama Pemain 1 (Merah):</label>
+                    <input type="text" id="p1-name-input" value="Pemain A" maxlength="10" 
+                        class="w-full px-3 py-1.5 rounded-xl border-2 border-rose-300 text-sm font-bold text-gray-800 focus:outline-none focus:border-rose-500">
+                </div>
+                <div class="bg-sky-50 p-3 rounded-2xl border-2 border-sky-200">
+                    <label class="title-font text-xs font-bold text-sky-700 block mb-1">Nama Pemain 2 (Biru):</label>
+                    <input type="text" id="p2-name-input" value="Pemain B" maxlength="10" 
+                        class="w-full px-3 py-1.5 rounded-xl border-2 border-sky-300 text-sm font-bold text-gray-800 focus:outline-none focus:border-sky-500">
+                </div>
+            </div>
+
+            <!-- Petunjuk Singkat -->
+            <div class="bg-indigo-50 border-2 border-dashed border-indigo-200 rounded-2xl p-3 mb-6 text-left max-w-md mx-auto text-xs sm:text-sm text-indigo-900 font-medium">
+                <p class="font-bold mb-1 title-font text-indigo-800"><i class="fa-solid fa-gamepad"></i> Aturan Duel:</p>
+                <ul class="list-disc list-inside space-y-1">
+                    <li>Pemain menjawab soal secara <b>bergantian</b>.</li>
+                    <li>Waktu total hanya <b>2 Menit (120 Detik)</b>!</li>
+                    <li>Jawaban benar mendapat <b>+10 Poin</b>. Siapa terbanyak dialah pemenangnya!</li>
+                </ul>
+            </div>
+
+            <!-- Tombol Mulai -->
+            <button onclick="startGame()" class="btn-bounce w-full sm:w-3/4 py-3.5 px-6 bg-emerald-400 hover:bg-emerald-500 text-white title-font text-xl sm:text-2xl font-bold rounded-2xl shadow-lg border-b-4 border-emerald-600 transition flex items-center justify-center gap-2 mx-auto">
+                <i class="fa-solid fa-play"></i> Mulai Duel Sekarang!
+            </button>
+        </div>
+
+
+        <!-- ==================== 2. HALAMAN PERMAINAN (GAMEPLAY) ==================== -->
+        <div id="game-screen" class="hidden relative z-10">
+            
+            <!-- Dashboard Skor 2 Pemain & Timer -->
+            <div class="grid grid-cols-3 items-center gap-2 mb-3">
+                <!-- Card Pemain 1 -->
+                <div id="p1-card" class="bg-rose-50 p-2 sm:p-3 rounded-2xl border-3 border-rose-300 text-center transition-all">
+                    <span class="text-xl sm:text-2xl block">👧🏻</span>
+                    <h4 id="p1-display-name" class="title-font text-xs sm:text-sm font-bold text-rose-700 truncate">Pemain A</h4>
+                    <div class="title-font text-xl sm:text-2xl font-black text-rose-600" id="p1-score">0</div>
+                </div>
+
+                <!-- Timer Tengah -->
+                <div class="bg-amber-100 p-2 sm:p-3 rounded-2xl border-3 border-amber-300 text-center shadow-inner">
+                    <span class="text-xs font-bold text-amber-800 uppercase block title-font">Sisa Waktu</span>
+                    <div id="timer-display" class="title-font text-2xl sm:text-3xl font-black text-amber-600 animate-pulse">
+                        02:00
+                    </div>
+                </div>
+
+                <!-- Card Pemain 2 -->
+                <div id="p2-card" class="bg-sky-50 p-2 sm:p-3 rounded-2xl border-3 border-sky-300 text-center transition-all">
+                    <span class="text-xl sm:text-2xl block">👦🏽</span>
+                    <h4 id="p2-display-name" class="title-font text-xs sm:text-sm font-bold text-sky-700 truncate">Pemain B</h4>
+                    <div class="title-font text-xl sm:text-2xl font-black text-sky-600" id="p2-score">0</div>
+                </div>
+            </div>
+
+            <!-- Indikator Giliran Siapa -->
+            <div id="turn-banner" class="text-center py-1.5 px-4 rounded-xl title-font font-bold text-sm sm:text-base text-white mb-3 shadow-sm bg-rose-500 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-hand-pointer"></i> Giliran Menjawab: <span id="current-player-turn-name">Pemain A</span>
+            </div>
+
+            <!-- Kartu Soal -->
+            <div class="bg-gradient-to-b from-amber-50 to-orange-50/30 border-3 border-amber-200 rounded-2xl p-4 sm:p-5 mb-4 shadow-sm text-center relative">
+                <div id="question-emoji" class="text-5xl sm:text-6xl mb-2 animate-float inline-block">
+                    🎁
+                </div>
+                <h2 id="question-text" class="text-base sm:text-lg font-bold text-gray-800 leading-snug">
+                    Bimo diberi hadiah mainan baru oleh Ayah. Perasaan Bimo adalah...
+                </h2>
+            </div>
+
+            <!-- Pilihan Jawaban (4 Tombol) -->
+            <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+                <!-- Diisi via JS -->
+            </div>
+
+            <!-- Modal / Card Feedback -->
+            <div id="feedback-card" class="hidden p-3.5 rounded-2xl mb-2 text-center border-2 transition-all">
+                <div class="flex items-center justify-center gap-2 mb-0.5">
+                    <span id="feedback-icon" class="text-xl">🎉</span>
+                    <h3 id="feedback-title" class="title-font text-base font-bold">Hebat Sekali!</h3>
+                </div>
+                <p id="feedback-text" class="text-xs sm:text-sm font-semibold text-gray-700">
+                    Penjelasan singkat akan muncul di sini.
+                </p>
+                <button id="next-btn" onclick="nextQuestion()" class="mt-2.5 py-2 px-5 bg-indigo-600 hover:bg-indigo-700 text-white title-font font-bold rounded-xl shadow border-b-3 border-indigo-800 transition text-sm inline-flex items-center gap-2">
+                    <span>Soal Berikutnya</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+
+        <!-- ==================== 3. HALAMAN HASIL AKHIR (RESULT) ==================== -->
+        <div id="result-screen" class="hidden text-center py-2 relative z-10">
+            <h2 class="title-font text-2xl sm:text-4xl font-bold text-indigo-700 mb-1">
+                Waktu Habis / Permainan Selesai! 🔔
+            </h2>
+            <p class="text-gray-600 font-semibold mb-4 text-xs sm:text-sm">
+                Pertandingan yang luar biasa antara kedua pemain!
+            </p>
+
+            <!-- Pengumuman Pemenang -->
+            <div id="winner-box" class="bg-gradient-to-r from-amber-100 via-yellow-100 to-amber-100 border-4 border-amber-300 rounded-3xl p-5 mb-5 shadow-md max-w-md mx-auto">
+                <div id="winner-crown" class="text-5xl mb-1">🏆</div>
+                <h3 id="winner-title" class="title-font text-2xl sm:text-3xl font-black text-amber-700 mb-1">
+                    Pemain 1 Menang!
+                </h3>
+                <p id="winner-sub" class="text-xs sm:text-sm font-bold text-gray-700">
+                    Selamat atas kemenangannya!
+                </p>
+            </div>
+
+            <!-- Rekapitulasi Skor -->
+            <div class="grid grid-cols-2 gap-3 max-w-md mx-auto mb-6">
+                <div class="bg-rose-50 p-3 rounded-2xl border-2 border-rose-300">
+                    <span class="text-2xl">👧🏻</span>
+                    <h4 id="res-p1-name" class="title-font text-xs font-bold text-rose-700">Pemain A</h4>
+                    <div class="title-font text-3xl font-black text-rose-600" id="res-p1-score">0</div>
+                    <span class="text-xs font-bold text-gray-500">Poin</span>
+                </div>
+                <div class="bg-sky-50 p-3 rounded-2xl border-2 border-sky-300">
+                    <span class="text-2xl">👦🏽</span>
+                    <h4 id="res-p2-name" class="title-font text-xs font-bold text-sky-700">Pemain B</h4>
+                    <div class="title-font text-3xl font-black text-sky-600" id="res-p2-score">0</div>
+                    <span class="text-xs font-bold text-gray-500">Poin</span>
+                </div>
+            </div>
+
+            <!-- Tombol Ulangi -->
+            <button onclick="restartGame()" class="btn-bounce py-3 px-8 bg-emerald-500 hover:bg-emerald-600 text-white title-font font-bold text-lg rounded-2xl shadow-lg border-b-4 border-emerald-700 transition inline-flex items-center gap-2">
+                <i class="fa-solid fa-rotate-right"></i> Main Lagi (Reset Duel)
+            </button>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Data Bank Soal Mengenal Perasaan
+        const questionBank = [
+            {
+                question: "Bimo diberi hadiah mainan robot baru oleh Ayah. Perasaan Bimo saat menerima hadiah adalah...",
+                emoji: "🎁",
+                options: [
+                    { text: "Senang 😊", isCorrect: true },
+                    { text: "Marah 😡", isCorrect: false },
+                    { text: "Sedih 😢", isCorrect: false },
+                    { text: "Takut 😨", isCorrect: false }
+                ],
+                explanation: "Mendapat hadiah membuat hati terasa senang dan gembira!"
+            },
+            {
+                question: "Tiba-tiba balon kesayangan Bimo meletus dengan suara keras. Bimo merasa...",
+                emoji: "🎈",
+                options: [
+                    { text: "Senang 😄", isCorrect: false },
+                    { text: "Kaget 😲", isCorrect: true },
+                    { text: "Lapar 😋", isCorrect: false },
+                    { text: "Malu 😳", isCorrect: false }
+                ],
+                explanation: "Suara letusan mendadak akan membuat kita terkejut atau kaget!"
+            },
+            {
+                question: "Mainan Bimo dirusak teman tanpa mau meminta maaf. Perasaan Bimo adalah...",
+                emoji: "🧩",
+                options: [
+                    { text: "Takut 😨", isCorrect: false },
+                    { text: "Sedih 😢", isCorrect: false },
+                    { text: "Marah 😡", isCorrect: true },
+                    { text: "Gembira 😀", isCorrect: false }
+                ],
+                explanation: "Saat barang kita dirusak, kita bisa merasa marah. Selesaikan dengan baik ya!"
+            },
+            {
+                question: "Malam hari tiba-tiba listrik padam dan kamar menjadi gelap sekali. Bimo merasa...",
+                emoji: "💡",
+                options: [
+                    { text: "Takut 😨", isCorrect: true },
+                    { text: "Senang 😄", isCorrect: false },
+                    { text: "Kaget 😲", isCorrect: false },
+                    { text: "Bangga 😎", isCorrect: false }
+                ],
+                explanation: "Suasana gelap gulita sering membuat kita merasa takut."
+            },
+            {
+                question: "Bimo berhasil dipanggil ke depan kelas dan dipuji guru karena nilainya 100. Bimo merasa...",
+                emoji: "⭐",
+                options: [
+                    { text: "Sedih 😢", isCorrect: false },
+                    { text: "Takut 😨", isCorrect: false },
+                    { text: "Bangga & Senang 🤩", isCorrect: true },
+                    { text: "Kaget 😲", isCorrect: false }
+                ],
+                explanation: "Meraih prestasi dan pujian atas usaha sendiri membuat kita merasa bangga!"
+            },
+            {
+                question: "Anak kucing peliharaan Bimo yang lucu hilang belum pulang. Bimo merasa...",
+                emoji: "🐱",
+                options: [
+                    { text: "Sedih 😢", isCorrect: true },
+                    { text: "Marah 😡", isCorrect: false },
+                    { text: "Gembira 😃", isCorrect: false },
+                    { text: "Kaget 😲", isCorrect: false }
+                ],
+                explanation: "Kehilangan hewan atau barang kesayangan membuat kita bersedih."
+            },
+            {
+                question: "Bimo tidak sengaja merobek buku cerita milik temannya. Bimo merasa...",
+                emoji: "📚",
+                options: [
+                    { text: "Bangga 😎", isCorrect: false },
+                    { text: "Malu & Bersalah 😳", isCorrect: true },
+                    { text: "Senang 😁", isCorrect: false },
+                    { text: "Lapar 😋", isCorrect: false }
+                ],
+                explanation: "Melakukan kesalahan membuat kita malu atau bersalah, segera minta maaf ya!"
+            },
+            {
+                question: "Ibu mengajak Bimo pergi piknik keluarga ke taman bermain. Bimo merasa...",
+                emoji: "🎡",
+                options: [
+                    { text: "Marah 😡", isCorrect: false },
+                    { text: "Takut 😨", isCorrect: false },
+                    { text: "Senang & Ceria 😄", isCorrect: true },
+                    { text: "Sedih 😢", isCorrect: false }
+                ],
+                explanation: "Berlibur dan bermain bersama keluarga pasti membuat merasa senang!"
+            },
+            {
+                question: "Bimo melihat benda aneh berbunyi unik di dalam kotak rahasia. Bimo merasa...",
+                emoji: "❓",
+                options: [
+                    { text: "Penasaran / Bertanya-tanya 🤔", isCorrect: true },
+                    { text: "Sedih 😢", isCorrect: false },
+                    { text: "Marah 😡", isCorrect: false },
+                    { text: "Malu 😳", isCorrect: false }
+                ],
+                explanation: "Melihat hal baru yang belum diketahui membuat kita merasa penasaran."
+            },
+            {
+                question: "Ada anjing galak menggonggong di depan pagar rumah. Bimo merasa...",
+                emoji: "🐕",
+                options: [
+                    { text: "Gembira 😃", isCorrect: false },
+                    { text: "Takut 😨", isCorrect: true },
+                    { text: "Sedih 😢", isCorrect: false },
+                    { text: "Senang 😊", isCorrect: false }
+                ],
+                explanation: "Mendengar gonggongan anjing galak memicu rasa takut agar kita waspada."
+            },
+            {
+                question: "Es krim Bimo yang lezat terjatuh sebelum sempat dimakan. Bimo merasa...",
+                emoji: "🍦",
+                options: [
+                    { text: "Sedih 😢", isCorrect: true },
+                    { text: "Senang 😁", isCorrect: false },
+                    { text: "Bangga 😎", isCorrect: false },
+                    { text: "Kaget 😲", isCorrect: false }
+                ],
+                explanation: "Sesuatu lezat yang batal dinikmati membuat kita merasa sedih."
+            },
+            {
+                question: "Tiba-tiba terdengar suara petir yang sangat kencang menyambar. Bimo merasa...",
+                emoji: "⚡",
+                options: [
+                    { text: "Senang 😊", isCorrect: false },
+                    { text: "Kaget & Takut 😲", isCorrect: true },
+                    { text: "Sedih 😢", isCorrect: false },
+                    { text: "Malu 😳", isCorrect: false }
+                ],
+                explanation: "Petir kencang mendadak mengejutkan dan membuat takut."
+            }
+        ];
+
+        // Game State Variables
+        let player1Name = "Pemain A";
+        let player2Name = "Pemain B";
+        let p1Score = 0;
+        let p2Score = 0;
+        
+        let currentPlayerTurn = 1; // 1 = Pemain 1, 2 = Pemain 2
+        let currentQuestionIndex = 0;
+        let answered = false;
+
+        // Timer Variables
+        let totalSeconds = 120; // 2 Menit = 120 Detik
+        let timerInterval = null;
+
+        // Visual Colors for Option Buttons
+        const optionColors = [
+            { bg: 'bg-rose-100 hover:bg-rose-200 border-rose-300 text-rose-800', badge: 'bg-rose-400' },
+            { bg: 'bg-sky-100 hover:bg-sky-200 border-sky-300 text-sky-800', badge: 'bg-sky-400' },
+            { bg: 'bg-amber-100 hover:bg-amber-200 border-amber-300 text-amber-800', badge: 'bg-amber-400' },
+            { bg: 'bg-purple-100 hover:bg-purple-200 border-purple-300 text-purple-800', badge: 'bg-purple-400' }
+        ];
+
+        const optionLabels = ['A', 'B', 'C', 'D'];
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        const p1DisplayName = document.getElementById('p1-display-name');
+        const p2DisplayName = document.getElementById('p2-display-name');
+        const p1ScoreEl = document.getElementById('p1-score');
+        const p2ScoreEl = document.getElementById('p2-score');
+
+        const p1Card = document.getElementById('p1-card');
+        const p2Card = document.getElementById('p2-card');
+        const turnBanner = document.getElementById('turn-banner');
+        const currentPlayerTurnName = document.getElementById('current-player-turn-name');
+
+        const timerDisplay = document.getElementById('timer-display');
+        const questionEmojiEl = document.getElementById('question-emoji');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+
+        const feedbackCard = document.getElementById('feedback-card');
+        const feedbackIcon = document.getElementById('feedback-icon');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+
+        // Memulai Permainan
+        function startGame() {
+            // Ambil Nama Pemain dari Input
+            const p1Input = document.getElementById('p1-name-input').value.trim();
+            const p2Input = document.getElementById('p2-name-input').value.trim();
+
+            player1Name = p1Input || "Pemain A";
+            player2Name = p2Input || "Pemain B";
+
+            p1DisplayName.textContent = player1Name;
+            p2DisplayName.textContent = player2Name;
+
+            // Reset Score & State
+            p1Score = 0;
+            p2Score = 0;
+            p1ScoreEl.textContent = "0";
+            p2ScoreEl.textContent = "0";
+
+            currentPlayerTurn = 1;
+            currentQuestionIndex = 0;
+            totalSeconds = 120; // Reset 2 Menit
+
+            // Acak urutan soal
+            questionBank.sort(() => Math.random() - 0.5);
+
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+
+            startTimer();
+            updateTurnUI();
+            loadQuestion();
+        }
+
+        // Timer Count Down 2 Menit
+        function startTimer() {
+            clearInterval(timerInterval);
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+                totalSeconds--;
+                updateTimerDisplay();
+
+                if (totalSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    endGame(); // Waktu habis -> Ke Hasil
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const formattedMin = String(minutes).padStart(2, '0');
+            const formattedSec = String(seconds).padStart(2, '0');
+            
+            timerDisplay.textContent = `${formattedMin}:${formattedSec}`;
+
+            if (totalSeconds <= 15) {
+                timerDisplay.classList.add('text-rose-600');
+            } else {
+                timerDisplay.classList.remove('text-rose-600');
+            }
+        }
+
+        // Update Tampilan Indikator Giliran Pemain
+        function updateTurnUI() {
+            if (currentPlayerTurn === 1) {
+                turnBanner.className = "text-center py-1.5 px-4 rounded-xl title-font font-bold text-sm sm:text-base text-white mb-3 shadow-sm bg-rose-500 flex items-center justify-center gap-2";
+                currentPlayerTurnName.textContent = `${player1Name} (Merah)`;
+                
+                p1Card.classList.add('active-turn-p1', 'scale-105');
+                p2Card.classList.remove('active-turn-p2', 'scale-105');
+            } else {
+                turnBanner.className = "text-center py-1.5 px-4 rounded-xl title-font font-bold text-sm sm:text-base text-white mb-3 shadow-sm bg-sky-500 flex items-center justify-center gap-2";
+                currentPlayerTurnName.textContent = `${player2Name} (Biru)`;
+
+                p2Card.classList.add('active-turn-p2', 'scale-105');
+                p1Card.classList.remove('active-turn-p1', 'scale-105');
+            }
+        }
+
+        // Memuat Soal Berdasarkan Index
+        function loadQuestion() {
+            answered = false;
+            feedbackCard.classList.add('hidden');
+
+            // Jika soal habis sebelum 2 menit, ulang rotasi acak
+            if (currentQuestionIndex >= questionBank.length) {
+                currentQuestionIndex = 0;
+                questionBank.sort(() => Math.random() - 0.5);
+            }
+
+            const q = questionBank[currentQuestionIndex];
+
+            questionEmojiEl.textContent = q.emoji;
+            questionTextEl.textContent = q.question;
+
+            optionsContainerEl.innerHTML = '';
+            q.options.forEach((opt, idx) => {
+                const style = optionColors[idx % optionColors.length];
+                const btn = document.createElement('button');
+                btn.className = `option-btn w-full p-3 sm:p-4 rounded-2xl border-2 text-left font-bold text-sm sm:text-base flex items-center gap-3 ${style.bg} transition shadow-sm cursor-pointer`;
+                btn.onclick = () => selectOption(idx);
+                
+                btn.innerHTML = `
+                    <span class="${style.badge} text-white rounded-xl px-2.5 py-0.5 text-xs font-extrabold title-font">
+                        ${optionLabels[idx]}
+                    </span>
+                    <span class="flex-1">${opt.text}</span>
+                `;
+                optionsContainerEl.appendChild(btn);
+            });
+        }
+
+        // Memilih Jawaban
+        function selectOption(index) {
+            if (answered) return;
+            answered = true;
+
+            const q = questionBank[currentQuestionIndex];
+            const selectedOpt = q.options[index];
+            const optionButtons = optionsContainerEl.children;
+
+            // Nonaktifkan cursor hover
+            for (let btn of optionButtons) {
+                btn.style.cursor = 'default';
+            }
+
+            const activePlayerName = currentPlayerTurn === 1 ? player1Name : player2Name;
+
+            if (selectedOpt.isCorrect) {
+                // Tambah Skor ke Pemain Aktif
+                if (currentPlayerTurn === 1) {
+                    p1Score += 10;
+                    p1ScoreEl.textContent = p1Score;
+                } else {
+                    p2Score += 10;
+                    p2ScoreEl.textContent = p2Score;
+                }
+
+                optionButtons[index].classList.add('bg-emerald-200', 'border-emerald-500', 'text-emerald-900', 'ring-4', 'ring-emerald-300');
+                showFeedback(true, `${activePlayerName} Benar (+10 Poin)! ${q.explanation}`);
+                
+                confetti({
+                    particleCount: 30,
+                    spread: 50,
+                    origin: { y: 0.7 }
+                });
+            } else {
+                optionButtons[index].classList.add('bg-rose-200', 'border-rose-500', 'text-rose-900', 'line-through');
+                
+                // Sorot jawaban yang benar
+                q.options.forEach((opt, i) => {
+                    if (opt.isCorrect) {
+                        optionButtons[i].classList.add('bg-emerald-100', 'border-emerald-400', 'text-emerald-900', 'ring-2', 'ring-emerald-300');
+                    }
+                });
+
+                showFeedback(false, `Jawaban ${activePlayerName} kurang tepat. ${q.explanation}`);
+            }
+        }
+
+        // Tampilkan Feedback
+        function showFeedback(isCorrect, explanation) {
+            feedbackCard.classList.remove('hidden', 'bg-emerald-50', 'border-emerald-200', 'bg-amber-50', 'border-amber-200');
+
+            if (isCorrect) {
+                feedbackCard.classList.add('bg-emerald-50', 'border-emerald-300');
+                feedbackIcon.textContent = '🎉';
+                feedbackTitle.textContent = 'Hebat Sekali!';
+                feedbackTitle.className = 'title-font text-base font-bold text-emerald-800';
+            } else {
+                feedbackCard.classList.add('bg-amber-50', 'border-amber-300');
+                feedbackIcon.textContent = '💡';
+                feedbackTitle.textContent = 'Yuk Pelajari!';
+                feedbackTitle.className = 'title-font text-base font-bold text-amber-800';
+            }
+
+            feedbackText.textContent = explanation;
+        }
+
+        // Lanjut Soal & Ganti Giliran Pemain
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            // Berganti giliran pemain (1 -> 2 atau 2 -> 1)
+            currentPlayerTurn = currentPlayerTurn === 1 ? 2 : 1;
+            
+            updateTurnUI();
+            loadQuestion();
+        }
+
+        // Selesai Permainan & Tampilkan Hasil Akhir
+        function endGame() {
+            clearInterval(timerInterval);
+            gameScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            document.getElementById('res-p1-name').textContent = player1Name;
+            document.getElementById('res-p2-name').textContent = player2Name;
+            document.getElementById('res-p1-score').textContent = p1Score;
+            document.getElementById('res-p2-score').textContent = p2Score;
+
+            const winnerCrown = document.getElementById('winner-crown');
+            const winnerTitle = document.getElementById('winner-title');
+            const winnerSub = document.getElementById('winner-sub');
+
+            if (p1Score > p2Score) {
+                winnerCrown.textContent = '🏆';
+                winnerTitle.textContent = `${player1Name} Menang!`;
+                winnerTitle.className = 'title-font text-2xl sm:text-3xl font-black text-rose-600 mb-1';
+                winnerSub.textContent = `Selamat ${player1Name} berhasil meraih skor tertinggi! 👧🏻🎉`;
+            } else if (p2Score > p1Score) {
+                winnerCrown.textContent = '🏆';
+                winnerTitle.textContent = `${player2Name} Menang!`;
+                winnerTitle.className = 'title-font text-2xl sm:text-3xl font-black text-sky-600 mb-1';
+                winnerSub.textContent = `Selamat ${player2Name} berhasil meraih skor tertinggi! 👦🏽🎉`;
+            } else {
+                winnerCrown.textContent = '🤝';
+                winnerTitle.textContent = "Hasil Seri / Imbang!";
+                winnerTitle.className = 'title-font text-2xl sm:text-3xl font-black text-amber-600 mb-1';
+                winnerSub.textContent = "Kalian berdua sama-sama hebat dan pintar! ⭐";
+            }
+
+            // Confetti Selebrasi Akhir
+            confetti({
+                particleCount: 100,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+        }
+
+        // Reset & Main Lagi
+        function restartGame() {
+            startScreen.classList.remove('hidden');
+            resultScreen.classList.add('hidden');
+            gameScreen.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
